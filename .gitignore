@@ -3,6 +3,10 @@ data/
 experiments/
 wandb/
 
+# Cleps slurm ignores
+*.err
+*.out
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
