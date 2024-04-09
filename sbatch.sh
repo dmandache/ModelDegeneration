@@ -1,19 +1,14 @@
 #!/bin/bash
 #
-# array.sbatch
-#
-# Allocated resources are NOT SHARED across the jobs.
-# They represent resources allocated for each job
-# in the array.
-
-#SBATCH --job-name=array_ex
-#SBATCH --output=%x_%A_%a.out
-#SBATCH --time=24:00:00
-#SBATCH --ntasks=1
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
+#SBATCH --mem=16GB
 
 # Load your environment (conda, ...)
 source /home/$USER/.bashrc
 conda activate py310
 
-python main.py f_${SLURM_ARRAY_TASK_ID}.in
+python main.py --input_dim 28 --latent_dim 8 --n_train 100 --n_test 100 --n_runs 10 --n_epochs 100 --k 1000 --sampler rhvae --architecture resnet
