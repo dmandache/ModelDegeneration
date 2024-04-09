@@ -83,10 +83,11 @@ if __name__ == '__main__':
     parser.add_argument('--n_test', type=int, default=100, help='Number of test samples per class')
     parser.add_argument('--k', type=int, default=200, help='Number of synthetic data samples to generate at each iteration')
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
-    parser.add_argument('--model', choices=['convnet','resnet', 'mlp'], default='mlp', help='Model Architecture')
+    parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp'], default='mlp', help='Model Architecture')
+    parser.add_argument('--model', choices=['rhvae','vae'], default='rhvae', help='VAE Model')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
-    parser.add_argument('--batch_size', type=int, default=200, help='Batch size')
+    parser.add_argument('--batch_size', type=int, default=1000, help='Batch size')
     args = parser.parse_args()
 
     # Set device
@@ -151,8 +152,8 @@ if __name__ == '__main__':
 
         model = RHVAE(
             model_config=model_config,
-            encoder=architecture_dict[args.model]['encoder'](model_config), 
-            decoder=architecture_dict[args.model]['decoder'](model_config) 
+            encoder=architecture_dict[args.architecture]['encoder'](model_config), 
+            decoder=architecture_dict[args.architecture]['decoder'](model_config) 
         )
 
         # trainer = BaseTrainer(

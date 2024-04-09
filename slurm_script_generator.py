@@ -5,13 +5,13 @@ import os
 arguments = {
     'input_dim': [28],
     'latent_dim': [8, 16],
-    'n_train' : [20, 100, 1000],
+    'n_train' : [100, 1000],
     'n_test' : [100],
     'n_runs': [10],
     'n_epochs': [100],
-    'k': [200],
+    'k': [1000],
     'sampler': ['rhvae', 'normal', 'gmm'],
-    'model': ['mlp', 'resnet', 'convnet']
+    'architecture': ['mlp', 'resnet', 'convnet']
 }
 
 # Generate all combinations of arguments
