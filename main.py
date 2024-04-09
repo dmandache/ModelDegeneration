@@ -14,7 +14,13 @@ import wandb
 import argparse
 import random
 from datetime import datetime
+import os
 
+## Group runs by by experiment
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+os.environ["WANDB_RUN_GROUP"] = f"experiment_{timestamp}"
+
+## Args dictionary
 architecture_dict = {
     'mlp':
         {
@@ -33,7 +39,6 @@ architecture_dict = {
         },
     }
 
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 def sample_indices(vector, k, seed=None):
     # # Example usage:
@@ -125,12 +130,11 @@ if __name__ == '__main__':
 
         print(f"RUN {i}")
 
-        # W&B init
         wandb_cb = WandbCallback()
         wandb_cb.setup(
             training_config=training_config, # training config
             model_config=model_config, # model config
-            project_name="model-degeneration", # specify your wandb project
+            project_name="model-degeneration", # specify your wandb project,
         )
 
         wandb.run.name = f"experiment_{timestamp}_run_{i}"
@@ -139,8 +143,12 @@ if __name__ == '__main__':
         callbacks = []
         callbacks.append(wandb_cb)
 
-        wandb.log({"Training Data": wandb.Image(train_dataset),
-                   "Evaluation Data": wandb.Image(eval_dataset)})
+        if i==0:
+            wandb.log({"Training Data": wandb.Image(train_dataset),
+                       "Evaluation Data": wandb.Image(eval_dataset)})
+        else:
+            wandb.log({"Training Data": wandb.Image(train_dataset)})
+
 
         model = RHVAE(
             model_config=model_config,
