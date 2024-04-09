@@ -219,7 +219,7 @@ if __name__ == '__main__':
         )
 
         gen_data = gen_data.to(device)
-s
+
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
         train_dataset = torch.cat((train_dataset, gen_data), 0)
