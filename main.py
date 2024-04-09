@@ -84,7 +84,7 @@ if __name__ == '__main__':
     parser.add_argument('--k', type=int, default=200, help='Number of synthetic data samples to generate at each iteration')
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
     parser.add_argument('--model', choices=['convnet','resnet', 'mlp'], default='resnet', help='Model Architecture')
-    parser.add_argument('--n_epochs', type=int, default=100, help='Number of training epochs for each run')
+    parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--batch_size', type=int, default=200, help='Batch size')
     args = parser.parse_args()
@@ -101,7 +101,6 @@ if __name__ == '__main__':
         beta_zero=0.3,
         temperature=1.5,
         regularization=0.001
-
     )
 
     # Training Config
@@ -170,7 +169,6 @@ if __name__ == '__main__':
             model=model
         )
 
-
         pipeline(
             train_data=train_dataset,
             eval_data=eval_dataset,
@@ -204,7 +202,7 @@ if __name__ == '__main__':
             )
 
             sampler = RHVAESampler(
-                sampler_config=None,
+                sampler_config=sampler_config,
                 model=model
             )
 
