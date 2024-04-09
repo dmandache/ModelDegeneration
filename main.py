@@ -124,6 +124,9 @@ if __name__ == '__main__':
     eval_dataset = mnist_trainset.data[eval_indeces].reshape(-1, 1, 28, 28) / 255.
     print(train_dataset.shape, eval_dataset.shape)
 
+    train_dataset = train_dataset.to(device)
+    eval_dataset = eval_dataset.to(device)
+
 
     # Training loop
     for i in range(args.n_runs):
@@ -215,6 +218,8 @@ if __name__ == '__main__':
             num_samples=args.k,
         )
 
+        gen_data = gen_data.to(device)
+s
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
         train_dataset = torch.cat((train_dataset, gen_data), 0)
