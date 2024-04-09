@@ -38,13 +38,13 @@ source /home/$USER/.bashrc
 conda activate py310
 
 # Run Python script with arguments
-python main.py --input_dim {input_dim} --latent_dim {latent_dim} --n_train {n_train} --n_test {n_test} --n_runs {n_runs} --n_epochs {n_epochs} --k {k} --sampler {sampler} --model {model}
+python main.py {arguments}
 """
 
 # Write Slurm job script for each combination of arguments
 for i, combo in enumerate(combinations):
-    script_content = slurm_template.format(input_dim=combo[0], hidden_dim=combo[1], latent_dim=combo[2],
-                                            n_iters=combo[3], k=combo[4], sampler=combo[5])
+    arguments_str = ' '.join([f'--{arg} {val}' for arg, val in zip(arguments.keys(), combo)])
+    script_content = slurm_template.format(arguments=arguments_str)
     script_path = os.path.join(output_dir, f"slurm_script_{i}.sh")
     with open(script_path, 'w') as f:
         f.write(script_content)
