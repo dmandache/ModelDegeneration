@@ -83,7 +83,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_test', type=int, default=100, help='Number of test samples per class')
     parser.add_argument('--k', type=int, default=200, help='Number of synthetic data samples to generate at each iteration')
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
-    parser.add_argument('--model', choices=['convnet','resnet', 'mlp'], default='resnet', help='Model Architecture')
+    parser.add_argument('--model', choices=['convnet','resnet', 'mlp'], default='mlp', help='Model Architecture')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--batch_size', type=int, default=200, help='Batch size')

@@ -11,7 +11,7 @@ arguments = {
     'n_epochs': [100],
     'k': [200],
     'sampler': ['rhvae', 'normal', 'gmm'],
-    'model': ['resnet', 'convnet']
+    'model': ['mlp', 'resnet', 'convnet']
 }
 
 # Generate all combinations of arguments

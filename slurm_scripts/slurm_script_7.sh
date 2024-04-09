@@ -14,4 +14,4 @@ source /home/$USER/.bashrc
 conda activate py310
 
 # Run Python script with arguments
-python main.py --input_dim 28 --latent_dim 8 --n_train 100 --n_test 100 --n_runs 10 --n_epochs 100 --k 200 --sampler rhvae --model convnet
+python main.py --input_dim 28 --latent_dim 8 --n_train 20 --n_test 100 --n_runs 10 --n_epochs 100 --k 200 --sampler gmm --model resnet
