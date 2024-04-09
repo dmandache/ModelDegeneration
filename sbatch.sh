@@ -1,5 +1,8 @@
 #!/bin/bash
-#
+# Set Slurm options
+#SBATCH --job-name=model-degeneration
+#SBATCH --output=model-degeneration.out
+#SBATCH --error=model-degeneration.err
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
@@ -8,6 +11,7 @@
 #SBATCH --mem=16GB
 
 # Load your environment (conda, ...)
+module load cuda
 source /home/$USER/.bashrc
 conda activate py310
 
