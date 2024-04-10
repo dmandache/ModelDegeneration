@@ -4,7 +4,7 @@ import os
 # Define combinations of arguments
 arguments = {
     'input_dim': [28],
-    'latent_dim': [8, 16],
+    'latent_dim': [2, 8],
     'n_train' : [100, 1000],
     'n_test' : [100],
     'n_runs': [10],

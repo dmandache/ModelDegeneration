@@ -2,12 +2,11 @@ import torch
 from torch.utils.data import Dataset, ConcatDataset
 from torchvision import datasets
 from pythae.data.datasets import DatasetOutput
-from pythae.models import RHVAEConfig, RHVAE
+from pythae.models import *
 from pythae.trainers import BaseTrainerConfig, BaseTrainer
 from pythae.pipelines.training import TrainingPipeline
 from pythae.trainers.training_callbacks import WandbCallback
-from pythae.samplers import NormalSampler, GaussianMixtureSampler, GaussianMixtureSamplerConfig
-from pythae.samplers import RHVAESampler, RHVAESamplerConfig
+from pythae.samplers import *
 from pythae.models.nn.benchmarks.mnist import *
 from pythae.models.nn.default_architectures import *
 import wandb
@@ -21,6 +20,11 @@ timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 os.environ["WANDB_RUN_GROUP"] = f"experiment_{timestamp}"
 
 ## Args dictionary
+model_dict = {
+    'vae': VAE,
+    'rhvae': RHVAE
+    }
+
 architecture_dict = {
     'mlp':
         {
@@ -77,7 +81,7 @@ if __name__ == '__main__':
     # Argument Parser
     parser = argparse.ArgumentParser() #description='Train a RHVAE with synthetic data generation.')
     parser.add_argument('--input_dim', type=int, default=28, help='Dimensionality of the input data')
-    parser.add_argument('--latent_dim', type=int, default=16, help='Dimensionality of the latent space')
+    parser.add_argument('--latent_dim', type=int, default=2, help='Dimensionality of the latent space')
     parser.add_argument('--n_runs', type=int, default=3, help='Number of degenerating runs')
     parser.add_argument('--n_train', type=int, default=20, help='Number of training samples per class')
     parser.add_argument('--n_test', type=int, default=100, help='Number of test samples per class')
@@ -94,15 +98,26 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Model Config
-    model_config = RHVAEConfig(
-        input_dim=(1, args.input_dim, args.input_dim),
-        latent_dim=args.latent_dim,
-        n_lf=1,
-        eps_lf=0.001,
-        beta_zero=0.3,
-        temperature=1.5,
-        regularization=0.001
-    )
+    if args.model == 'rhvae':
+        model_config = RHVAEConfig(
+            input_dim=(1, args.input_dim, args.input_dim),
+            latent_dim=args.latent_dim,
+            # n_lf=1,
+            # eps_lf=0.001,
+            # beta_zero=0.3,
+            # temperature=1.5,
+            # regularization=0.001
+            n_lf=3,
+            eps_lf=0.01,
+            beta_zero=0.3,
+            temperature=0.8,
+            regularization=0.001
+        )
+    elif args.model == 'vae':
+        model_config = VAEConfig(
+            input_dim=(1, args.input_dim, args.input_dim),
+            latent_dim=args.latent_dim
+        )
 
     # Training Config
     training_config = BaseTrainerConfig(
@@ -153,7 +168,7 @@ if __name__ == '__main__':
             wandb.log({"Training Data": wandb.Image(train_dataset)})
 
 
-        model = RHVAE(
+        model = model_dict[args.model](
             model_config=model_config,
             encoder=architecture_dict[args.architecture]['encoder'](model_config), 
             decoder=architecture_dict[args.architecture]['decoder'](model_config) 
