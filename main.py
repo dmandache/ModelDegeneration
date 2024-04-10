@@ -108,7 +108,7 @@ if __name__ == '__main__':
             # temperature=1.5,
             # regularization=0.001
             n_lf=3,
-            eps_lf=0.01,
+            eps_lf=0.001,
             beta_zero=0.3,
             temperature=0.8,
             regularization=0.001
