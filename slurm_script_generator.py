@@ -5,7 +5,7 @@ import os
 arguments = {
     'input_dim': [28],
     'latent_dim': [2, 8],
-    'n_train' : [100, 1000],
+    'n_train' : [100],
     'n_test' : [100],
     'n_runs': [10],
     'n_epochs': [100],
