@@ -84,7 +84,7 @@ if __name__ == '__main__':
     parser.add_argument('--latent_dim', type=int, default=2, help='Dimensionality of the latent space')
     parser.add_argument('--n_runs', type=int, default=3, help='Number of degenerating runs')
     parser.add_argument('--n_train', type=int, default=20, help='Number of training samples per class')
-    parser.add_argument('--n_test', type=int, default=100, help='Number of test samples per class')
+    parser.add_argument('--n_test', type=int, default=20, help='Number of test samples per class')
     parser.add_argument('--k', type=int, default=200, help='Number of synthetic data samples to generate at each iteration')
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
     parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp'], default='mlp', help='Model Architecture')
@@ -126,6 +126,8 @@ if __name__ == '__main__':
         learning_rate=args.lr,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
+        scheduler_cls="ReduceLROnPlateau",
+        scheduler_params={"patience": 5, "factor": 0.5}
     )
 
     # Real data loader
