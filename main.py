@@ -167,7 +167,7 @@ if __name__ == '__main__':
             wandb.log({"Training Data": wandb.Image(train_dataset),
                        "Evaluation Data": wandb.Image(eval_dataset)})
         else:
-            wandb.log({"Training Data": wandb.Image(train_dataset)})
+            wandb.log({"Generated Data": wandb.Image(gen_data)})
 
 
         model = model_dict[args.model](
