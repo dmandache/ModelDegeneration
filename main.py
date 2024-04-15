@@ -99,7 +99,7 @@ if __name__ == '__main__':
             # eps_lf=0.001,
             # beta_zero=0.3,
             # temperature=1.5,
-            # regularization=0.001s
+            # regularization=0.001
         )
     elif args.model == 'vae':
         model_config = VAEConfig(

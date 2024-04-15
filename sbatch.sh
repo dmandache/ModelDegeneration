@@ -13,4 +13,4 @@ module load cuda
 source /home/$USER/.bashrc
 conda activate py310
 
-python main.py --input_dim 28 --latent_dim 2 --n_train 50 --n_test 10 --n_runs 10 --batch_size -1 --n_epochs 100 --k 500 --model rhvae --architecture tiny --sampler rhvae 
+python main.py --input_dim 28 --latent_dim 8 --n_train 200 --n_test 50 --n_runs 10 --batch_size -1 --n_epochs 500 --k 2000 --model rhvae --architecture tiny --sampler rhvae 
