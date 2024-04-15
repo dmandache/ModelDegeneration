@@ -91,44 +91,11 @@ if __name__ == '__main__':
     parser.add_argument('--model', choices=['rhvae','vae'], default='rhvae', help='VAE Model')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
-    parser.add_argument('--batch_size', type=int, default=1000, help='Batch size')
+    parser.add_argument('--batch_size', type=int, default=1000, help='Batch size (-1 = entire dataset)')
     args = parser.parse_args()
 
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Model Config
-    if args.model == 'rhvae':
-        model_config = RHVAEConfig(
-            input_dim=(1, args.input_dim, args.input_dim),
-            latent_dim=args.latent_dim,
-            # n_lf=1,
-            # eps_lf=0.001,
-            # beta_zero=0.3,
-            # temperature=1.5,
-            # regularization=0.001
-            n_lf=3,
-            eps_lf=0.001,
-            beta_zero=0.3,
-            temperature=0.8,
-            regularization=0.01
-        )
-    elif args.model == 'vae':
-        model_config = VAEConfig(
-            input_dim=(1, args.input_dim, args.input_dim),
-            latent_dim=args.latent_dim
-        )
-
-    # Training Config
-    training_config = BaseTrainerConfig(
-        output_dir=f'experiments/{timestamp}',
-        num_epochs=args.n_epochs,
-        learning_rate=args.lr,
-        per_device_train_batch_size=args.batch_size,
-        per_device_eval_batch_size=args.batch_size,
-        scheduler_cls="ReduceLROnPlateau",
-        scheduler_params={"patience": 5, "factor": 0.5}
-    )
 
     # Real data loader
     mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=None)
@@ -143,6 +110,38 @@ if __name__ == '__main__':
 
     train_dataset = train_dataset.to(device)
     eval_dataset = eval_dataset.to(device)
+
+    # Check Args
+    batch_size_train = len(train_dataset) if args.batch_size == -1 else args.batch_size
+    batch_size_eval = len(eval_dataset) if args.batch_size == -1 else args.batch_size
+
+    # Model Config
+    if args.model == 'rhvae':
+        model_config = RHVAEConfig(
+            input_dim=(1, args.input_dim, args.input_dim),
+            latent_dim=args.latent_dim,
+            # n_lf=1,
+            # eps_lf=0.001,
+            # beta_zero=0.3,
+            # temperature=1.5,
+            # regularization=0.001s
+        )
+    elif args.model == 'vae':
+        model_config = VAEConfig(
+            input_dim=(1, args.input_dim, args.input_dim),
+            latent_dim=args.latent_dim
+        )
+
+    # Training Config
+    training_config = BaseTrainerConfig(
+        output_dir=f'experiments/{timestamp}',
+        num_epochs=args.n_epochs,
+        learning_rate=args.lr,
+        per_device_train_batch_size=batch_size_train,
+        per_device_eval_batch_size=batch_size_eval,
+        scheduler_cls="ReduceLROnPlateau",
+        scheduler_params={"patience": 5, "factor": 0.5}
+    )
 
 
     # Training loop
@@ -159,6 +158,7 @@ if __name__ == '__main__':
 
         wandb.run.name = f"experiment_{timestamp}_run_{i}"
         wandb.config.update(args)
+        wandb.config.update({'run': i})
 
         callbacks = []
         callbacks.append(wandb_cb)
