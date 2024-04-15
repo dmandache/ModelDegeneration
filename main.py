@@ -9,6 +9,8 @@ from pythae.trainers.training_callbacks import WandbCallback
 from pythae.samplers import *
 from pythae.models.nn.benchmarks.mnist import *
 from pythae.models.nn.default_architectures import *
+from utils.models import Encoder_VAE_TinyMLP, Decoder_AE_TinyMLP
+from utils.data import sample_indices
 import wandb
 import argparse
 import random
@@ -26,6 +28,11 @@ model_dict = {
     }
 
 architecture_dict = {
+    'tiny':
+        {
+        'encoder': Encoder_VAE_TinyMLP,
+        'decoder': Decoder_AE_TinyMLP,
+        },
     'mlp':
         {
         'encoder': Encoder_VAE_MLP,
@@ -43,38 +50,6 @@ architecture_dict = {
         },
     }
 
-
-def sample_indices(vector, k, seed=None):
-    # # Example usage:
-    # vector = torch.tensor([0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 3])  # Example tensor with 4 labels
-    # k = 3  # Number of points to sample from each label
-    # seed = 42  # Seed for reproducibility
-    # sampled_indices = sample_indices(vector, k, seed)
-    # print("Sampled indices:", sampled_indices)
-
-    if seed is not None:
-        random.seed(seed)
-
-    indices = []
-    label_dict = {}
-
-    # Group indices by label
-    for i, label in enumerate(vector):
-        label = label.item() if torch.is_tensor(label) else label
-        if label not in label_dict:
-            label_dict[label] = [i]
-        else:
-            label_dict[label].append(i)
-
-    # Sample k points from each label
-    for label, label_indices in label_dict.items():
-        sampled_indices = random.sample(label_indices, min(k, len(label_indices)))
-        indices.extend(sampled_indices)
-
-    random.shuffle(indices)
-
-    return indices
-
     
 if __name__ == '__main__':
 
@@ -87,7 +62,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_test', type=int, default=20, help='Number of test samples per class')
     parser.add_argument('--k', type=int, default=200, help='Number of synthetic data samples to generate at each iteration')
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
-    parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp'], default='mlp', help='Model Architecture')
+    parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp', 'tiny'], default='tiny', help='Model Architecture')
     parser.add_argument('--model', choices=['rhvae','vae'], default='rhvae', help='VAE Model')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
