@@ -3,6 +3,10 @@ from pythae.models.nn.default_architectures import *
 from pythae.models.base.base_utils import ModelOutput
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 class Encoder_VAE_TinyMLP(BaseEncoder):
     def __init__(self, args:dict):
         BaseEncoder.__init__(self)

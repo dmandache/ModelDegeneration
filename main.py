@@ -10,6 +10,7 @@ from pythae.samplers import *
 from pythae.models.nn.benchmarks.mnist import *
 from pythae.models.nn.default_architectures import *
 from utils.models import Encoder_VAE_TinyMLP, Decoder_AE_TinyMLP
+from utils.models import count_parameters
 from utils.data import sample_indices
 import wandb
 import argparse
@@ -64,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
     parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp', 'tiny'], default='tiny', help='Model Architecture')
     parser.add_argument('--model', choices=['rhvae','vae'], default='rhvae', help='VAE Model')
+    parser.add_argument('--loss', choices=['bce','mse'], default='mse', help='Recosntruction loss [BCE or MSE]')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--batch_size', type=int, default=1000, help='Batch size (-1 = entire dataset)')
@@ -79,8 +81,8 @@ if __name__ == '__main__':
     remaining_indeces = list(set(range(len(mnist_trainset.targets)))-set(train_indeces))
     eval_indeces = sample_indices(mnist_trainset.targets[remaining_indeces], k=args.n_test, seed=42)
 
-    train_dataset = mnist_trainset.data[train_indeces].reshape(-1, 1, 28, 28) / 255.
-    eval_dataset = mnist_trainset.data[eval_indeces].reshape(-1, 1, 28, 28) / 255.
+    train_dataset = mnist_trainset.data[train_indeces].reshape(-1, 1, args.input_dim, args.input_dim,) / 255.
+    eval_dataset = mnist_trainset.data[eval_indeces].reshape(-1, 1, args.input_dim, args.input_dim) / 255.
     print(train_dataset.shape, eval_dataset.shape)
 
     train_dataset = train_dataset.to(device)
@@ -95,16 +97,18 @@ if __name__ == '__main__':
         model_config = RHVAEConfig(
             input_dim=(1, args.input_dim, args.input_dim),
             latent_dim=args.latent_dim,
-            # n_lf=1,
-            # eps_lf=0.001,
+            reconstruction_loss=args.loss,
+            # n_lf=3,
+            # eps_lf=1e-3,
             # beta_zero=0.3,
-            # temperature=1.5,
-            # regularization=0.001
+            # temperature=0.8,
+            # regularization=1e-3
         )
     elif args.model == 'vae':
         model_config = VAEConfig(
             input_dim=(1, args.input_dim, args.input_dim),
-            latent_dim=args.latent_dim
+            latent_dim=args.latent_dim,
+            reconstruction_loss=args.loss,
         )
 
     # Training Config
@@ -150,6 +154,8 @@ if __name__ == '__main__':
             encoder=architecture_dict[args.architecture]['encoder'](model_config), 
             decoder=architecture_dict[args.architecture]['decoder'](model_config) 
         )
+
+        wandb.config.update({'num_params': count_parameters(model)})
 
         # trainer = BaseTrainer(
         #     model=model,
