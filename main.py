@@ -180,8 +180,8 @@ if __name__ == '__main__':
         # Generate synthetic data
         if args.sampler == 'normal':
             sampler = NormalSampler(
-                model=model,
-                sampler_config=None
+                sampler_config=None,
+                model=model
             )
         elif args.sampler == 'gmm':
             sampler_config = GaussianMixtureSamplerConfig(
