@@ -14,7 +14,7 @@ def calculate_fid(real_images, generated_images, batch_size=64):
     ])
 
     # Load the pre-trained Inception v3 model
-    inception_model = inception_v3(pretrained=True, transform_input=False, aux_logits=False)
+    inception_model = inception_v3(pretrained=True)#, transform_input=False, aux_logits=False)
     inception_model.eval()
     if torch.cuda.is_available():
         inception_model = inception_model.cuda()

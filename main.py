@@ -21,6 +21,7 @@ import os
 ## Group runs by by experiment
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 os.environ["WANDB_RUN_GROUP"] = f"experiment_{timestamp}"
+LOG_DIR = f'experiments/{timestamp}'
 
 ## Args dictionary
 model_dict = {
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     parser.add_argument('--sampler', choices=['normal', 'gmm', 'rhvae'], default='rhvae', help='Sampler type for generating synthetic data')
     parser.add_argument('--architecture', choices=['convnet','resnet', 'mlp', 'tiny'], default='tiny', help='Model Architecture')
     parser.add_argument('--model', choices=['rhvae','vae'], default='rhvae', help='VAE Model')
-    parser.add_argument('--loss', choices=['bce','mse'], default='mse', help='Recosntruction loss [BCE or MSE]')
+    parser.add_argument('--loss', choices=['bce','mse'], default='bce', help='Recosntruction loss [BCE or MSE]')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of training epochs for each run')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--batch_size', type=int, default=1000, help='Batch size (-1 = entire dataset)')
@@ -113,7 +114,7 @@ if __name__ == '__main__':
 
     # Training Config
     training_config = BaseTrainerConfig(
-        output_dir=f'experiments/{timestamp}',
+        output_dir=LOG_DIR,
         num_epochs=args.n_epochs,
         learning_rate=args.lr,
         per_device_train_batch_size=batch_size_train,
@@ -217,6 +218,9 @@ if __name__ == '__main__':
         )
 
         gen_data = gen_data.to(device)
+
+        # Save Generated data as NumPy array to a file
+        np.save(f'{LOG_DIR}/gendata_{i}.npy', gen_data.numpy())
 
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
