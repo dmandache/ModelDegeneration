@@ -6,6 +6,7 @@ from utils.metrics import calculate_fid
 
 _ = torch.manual_seed(123)
 from torchmetrics.image.fid import FrechetInceptionDistance
+from torchmetrics.image.inception import InceptionScore
 
 input_dim = 28
 
@@ -18,20 +19,20 @@ real_images = real_images.data[sample_indeces].reshape(-1, 1, input_dim, input_d
 
 generated_images = np.load('experiments/2024-04-23_10-53-54/gendata_0.npy')
 generated_images = torch.from_numpy(generated_images)
-#generated_images = (generated_images*255).to(dtype=torch.uint8)
 
-# print("Real images:", real_images.shape, real_images.dtype, real_images.min(), real_images.max(), real_images.mean())
-# print("Generated images:", generated_images.shape, generated_images.min(), generated_images.max(), generated_images.mean())
-
+print("Real images:", real_images.shape, real_images.dtype, real_images.min(), real_images.max(), real_images.mean())
+print("Generated images:", generated_images.shape, generated_images.min(), generated_images.max(), generated_images.mean())
 
 fid = FrechetInceptionDistance(feature=64, reset_real_features=False, normalize=True)
-# generate two slightly overlapping image intensity distributions
-# imgs_dist1 = torch.randint(0, 200, (100, 3, 299, 299), dtype=torch.uint8)
-# imgs_dist2 = torch.randint(100, 255, (100, 3, 299, 299), dtype=torch.uint8)
 fid.update(real_images.expand(real_images.shape[0], 3, 28, 28), real=True)
 fid.update(generated_images.expand(generated_images.shape[0], 3, 28, 28), real=False)
 fid_score = fid.compute().item()
 print(f"FID = {fid_score:.4f}")
+
+is_calculator = InceptionScore(normalize=True)
+is_calculator.update(generated_images.expand(generated_images.shape[0], 3, 28, 28))
+is_score = is_calculator.compute()
+print(f"IS = {is_score[0]:.4f} ± {is_score[1]:.4f}")
 
 import matplotlib.pyplot as plt
 from skimage.util import montage

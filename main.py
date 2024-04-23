@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, ConcatDataset
 from torchvision import datasets
 from torchmetrics.image.fid import FrechetInceptionDistance
+from torchmetrics.image.inception import InceptionScore
 from pythae.data.datasets import DatasetOutput
 from pythae.models import *
 from pythae.trainers import BaseTrainerConfig, BaseTrainer
@@ -129,12 +130,15 @@ if __name__ == '__main__':
         scheduler_params={"patience": 5, "factor": 0.5}
     )
 
-    # FID computation class
-    fid = FrechetInceptionDistance(feature=64, reset_real_features=False, normalize=True)
-    fid.update(train_dataset.expand(train_dataset.shape[0], 3, args.input_dim, args.input_dim).to('cpu'), real=True)
+    # FID score computation class
+    fid_calculator = FrechetInceptionDistance(feature=64, reset_real_features=False, normalize=True)
+    fid_calculator.update(train_dataset.expand(train_dataset.shape[0], 3, args.input_dim, args.input_dim).to('cpu'), real=True)
+
+    # IS score computation class
+    is_calculator = InceptionScore(normalize=True)
 
     # Create an empty DataFrame to log the FID
-    df = pd.DataFrame(columns=['fid'])
+    df = pd.DataFrame(columns=['fid', 'is_mean','is_std'])
     df.index.name = 'run'
 
     # Training loop
@@ -230,16 +234,23 @@ if __name__ == '__main__':
             num_samples=args.k,
         )
 
-        # Compute FID score and save to DataFrame
-        fid.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim).cpu(), real=False)
-        fid_score = fid.compute().item()
+        # Compute FID score and add to DataFrame
+        fid_calculator.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim).cpu(), real=False)
+        fid_score = fid_calculator.compute().item()
         print(fid_score)
-        df.loc[len(df)] = fid_score
-        df.to_csv(f'{LOG_DIR}/fid.csv')
+        df.loc[i, 'fid'] = fid_score
 
+        # Compute IS score and add to DataFrame
+        is_calculator.update(gen_data.expand(gen_data.shape[0], 3, 28, 28))
+        is_score = is_calculator.compute()
+        df.loc[i, 'is_mean'] = is_score[0].item()
+        df.loc[i, 'is_std'] = is_score[1].item()
+
+        # Save DataFrame
+        df.to_csv(f'{LOG_DIR}/gendata_metrics.csv')
 
         # Save Generated data as NumPy array to a file
-        np.save(f'{LOG_DIR}/gendata_{i}_fid_{fid_score:.4f}.npy', gen_data.cpu().numpy())
+        np.save(f'{LOG_DIR}/gendata_{i}.npy', gen_data.cpu().numpy())
         gen_data = gen_data.to(device)
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
