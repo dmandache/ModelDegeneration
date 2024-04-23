@@ -231,7 +231,7 @@ if __name__ == '__main__':
         )
 
         # Compute FID score and save to DataFrame
-        fid.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim).to('cpu'), real=False)
+        fid.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim).cpu(), real=False)
         fid_score = fid.compute().item()
         print(fid_score)
         df.loc[len(df)] = fid_score
@@ -239,7 +239,7 @@ if __name__ == '__main__':
 
 
         # Save Generated data as NumPy array to a file
-        np.save(f'{LOG_DIR}/gendata_{i}_fid_{fid_score:.4f}.npy', gen_data.numpy())
+        np.save(f'{LOG_DIR}/gendata_{i}_fid_{fid_score:.4f}.npy', gen_data.cpu().numpy())
         gen_data = gen_data.to(device)
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
