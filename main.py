@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, ConcatDataset
 from torchvision import datasets
+from torchmetrics.image.fid import FrechetInceptionDistance
 from pythae.data.datasets import DatasetOutput
 from pythae.models import *
 from pythae.trainers import BaseTrainerConfig, BaseTrainer
@@ -16,7 +17,10 @@ import wandb
 import argparse
 import random
 from datetime import datetime
+import pandas as pd
 import os
+
+_ = torch.manual_seed(42)
 
 ## Group runs by by experiment
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -86,6 +90,8 @@ if __name__ == '__main__':
     eval_dataset = mnist_trainset.data[eval_indeces].reshape(-1, 1, args.input_dim, args.input_dim) / 255.
     print(train_dataset.shape, eval_dataset.shape)
 
+    #real_data = train_dataset.clone()
+
     train_dataset = train_dataset.to(device)
     eval_dataset = eval_dataset.to(device)
 
@@ -123,6 +129,13 @@ if __name__ == '__main__':
         scheduler_params={"patience": 5, "factor": 0.5}
     )
 
+    # FID computation class
+    fid = FrechetInceptionDistance(feature=64, reset_real_features=False, normalize=True)
+    fid.update(train_dataset.expand(train_dataset.shape[0], 3, args.input_dim, args.input_dim), real=True)
+
+    # Create an empty DataFrame to log the FID
+    df = pd.DataFrame(columns=['fid'])
+    df.index.name = 'run'
 
     # Training loop
     for i in range(args.n_runs):
@@ -217,10 +230,16 @@ if __name__ == '__main__':
             num_samples=args.k,
         )
 
+        fid.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim), real=False)
+        fid_score = fid.compute().item()
+        print(fid_score)
+        df.loc[len(df)] = fid_score
+        df.to_csv(f'{LOG_DIR}/fid.csv')
+
         gen_data = gen_data.to(device)
 
         # Save Generated data as NumPy array to a file
-        np.save(f'{LOG_DIR}/gendata_{i}.npy', gen_data.numpy())
+        np.save(f'{LOG_DIR}/gendata_{i}_fid_{fid_score:.4f}.npy', gen_data.numpy())
 
         # Update Training Dataset with Generated Data
         #train_dataset = ConcatDataset([train_dataset, gen_data])
