@@ -241,7 +241,7 @@ if __name__ == '__main__':
         df.loc[i, 'fid'] = fid_score
 
         # Compute IS score and add to DataFrame
-        is_calculator.update(gen_data.expand(gen_data.shape[0], 3, 28, 28))
+        is_calculator.update(gen_data.expand(gen_data.shape[0], 3, args.input_dim, args.input_dim).cpu())
         is_score = is_calculator.compute()
         df.loc[i, 'is_mean'] = is_score[0].item()
         df.loc[i, 'is_std'] = is_score[1].item()
