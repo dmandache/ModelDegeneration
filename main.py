@@ -146,6 +146,14 @@ if __name__ == '__main__':
 
         print(f"RUN {i}")
 
+        # Init Model
+        model = model_dict[args.model](
+            model_config=model_config,
+            encoder=architecture_dict[args.architecture]['encoder'](model_config), 
+            decoder=architecture_dict[args.architecture]['decoder'](model_config) 
+        )
+
+        # W & B
         wandb_cb = WandbCallback()
         wandb_cb.setup(
             training_config=training_config, # training config
@@ -166,13 +174,6 @@ if __name__ == '__main__':
         else:
             wandb.log({"Generated Data": wandb.Image(gen_data)})
 
-
-        model = model_dict[args.model](
-            model_config=model_config,
-            encoder=architecture_dict[args.architecture]['encoder'](model_config), 
-            decoder=architecture_dict[args.architecture]['decoder'](model_config) 
-        )
-
         wandb.config.update({'num_params': count_parameters(model)})
 
         # trainer = BaseTrainer(
@@ -184,6 +185,8 @@ if __name__ == '__main__':
 
         #trainer.train()
 
+
+        # Train
         pipeline = TrainingPipeline(
             training_config=training_config,
             model=model
@@ -192,7 +195,7 @@ if __name__ == '__main__':
         pipeline(
             train_data=train_dataset,
             eval_data=eval_dataset,
-            callbacks=callbacks # pass the callbacks to the TrainingPipeline and you are done!
+            callbacks=callbacks 
         )
 
         # Generate synthetic data
