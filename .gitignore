@@ -4,6 +4,9 @@ experiments/
 wandb/
 sbatch_cleps.sh
 
+*.json
+*.pt
+
 # Cleps slurm ignores
 *.err
 *.out

@@ -30,5 +30,4 @@ def sample_indices(vector, k, seed=None):
         indices.extend(sampled_indices)
 
     random.shuffle(indices)
-
     return indices
