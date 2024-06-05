@@ -6,6 +6,7 @@ sbatch_cleps.sh
 
 *.json
 *.pt
+*.pkl
 
 # Cleps slurm ignores
 *.err
